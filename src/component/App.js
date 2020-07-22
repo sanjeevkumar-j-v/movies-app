@@ -2,7 +2,7 @@ import React from 'react';
 import { data } from '../data';
 import Navbar from './Navbar';
 import MovieCard from './MovieCard';
-import { addMovies  } from '../actions';
+import { addMovies, setShowFavourite  } from '../actions';
 
 class App extends React.Component {
   componentDidMount () {
@@ -15,7 +15,7 @@ class App extends React.Component {
     // dispatch action
     store.dispatch(addMovies(data));
 
-    console.log('state ',this.props.store.getState());
+    // console.log('state ',this.props.store.getState());
   }
 
   isMovieFavourite = (movie) => {
@@ -26,24 +26,27 @@ class App extends React.Component {
     if(index !== -1)
       return true;
     return false;
-
-
+  }
+  changeTab = (val) => {
+    this.props.store.dispatch(setShowFavourite(val));
   }
   render () {
-    const { list } =  this.props.store.getState();
+    const { list , favourites , showFavourites } =  this.props.store.getState();
     console.log('render ',this.props.store.getState());
+
+    const displayMovies = showFavourites ? favourites : list;
 
     return (
       <div className="App">
         <Navbar />
         <div className="main">
           <div className="tabs">
-            <div className="tab">Movies</div>
-            <div className="tab">Favorite</div>
+            <div className={`tab ${showFavourites ? '' : 'active-tabs'}`} onClick={() => this.changeTab(false)}>Movies</div>
+            <div className={`tab ${showFavourites ? 'active-tabs' : ''}`} onClick={() => this.changeTab(true)}>Favourite</div>
           </div>
 
           <div className="list">
-            {list.map((movie, index) => (
+            {displayMovies.map((movie, index) => (
               <MovieCard 
               movie={movie} 
               key={`movies-${index}`} 
@@ -51,6 +54,9 @@ class App extends React.Component {
               isFavourite = {this.isMovieFavourite(movie)}
               />
             ))}
+          </div>
+          <div>
+            {displayMovies.length === 0 ? 'No favourite movies to display' : null}
           </div>
         </div>
       </div>
